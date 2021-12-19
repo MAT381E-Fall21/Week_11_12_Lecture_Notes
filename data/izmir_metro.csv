@@ -1,0 +1,18 @@
+﻿_id,ISTASYON_ID,ISTASYON_ADI,ISTASYON_SIRASI,AKTIF_MI,BOYLAM,ENLEM
+1,12,Evka - 3,1, True,27.2289,38.4656
+2,11,Ege Üniversitesi,2, True,27.2283,38.46
+3,10,Bornova,3, True,27.2128,38.4586
+4,9,Bölge,4, True,27.2008,38.4547
+5,8,Sanayi,5, True,27.19,38.4481
+6,7,Stadyum,6, True,27.1808,38.4425
+7,6,Halkapınar,7, True,27.1686,38.435
+8,5,Hilal,8, True,27.1564,38.4275
+9,4,Basmane,9, True,27.1441,38.4227
+10,3,Çankaya,10, True,27.1369,38.4225
+11,2,Konak,11, True,27.1283,38.4175
+12,1,Üçyol,12, True,27.120883,38.406182
+13,13,İzmirspor,13, True,27.1103,38.4017
+14,14,Hatay,14, True,27.1031,38.4015
+15,15,Göztepe,15, True,27.0943,38.3965
+16,16,Poligon,16, True,27.0841,38.3916
+17,17,Fahrettin Altay,17, True,27.0698,38.3953
