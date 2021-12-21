@@ -132,20 +132,21 @@ knitr::include_graphics("images/istanbul.jpeg")
 ---
 class: middle, center
 
-```{r, echo=F, out.width="%10", fig.link="https://www.esri.com/en-us/what-is-gis/overview"}
+```{r, echo=F, out.width="%10", fig.link="http://morharitam.ankara.bel.tr/"}
 knitr::include_graphics("images/mor_haritam.png")
 ```
 
-[Source](https://www.esri.com/en-us/what-is-gis/overview)
+[Source](http://morharitam.ankara.bel.tr/)
+
 
 ---
 class: middle, center
 
-```{r, echo=F, out.width="%10", fig.link="http://morharitam.ankara.bel.tr/"}
+```{r, echo=F, out.width="%10", fig.link="https://www.esri.com/en-us/what-is-gis/overview"}
 knitr::include_graphics("images/gis.png")
 ```
 
-[Source](http://morharitam.ankara.bel.tr/)
+[Source](https://www.esri.com/en-us/what-is-gis/overview)
 ---
 #### Spatial data storage formats
 - **Geospatial data in vector format** along with its **attributes** (additional non-geographical information) is often stored in a **shapefile format**, which comes from [ArcGIS](https://www.arcgis.com/index.html) software maintained by the [Environmental Systems Research Institute](https://www.esri.com/en-us/home) (ESRI).
