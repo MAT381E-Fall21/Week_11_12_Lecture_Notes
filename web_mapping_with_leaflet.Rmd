@@ -127,15 +127,15 @@ class(state)
 
 - Now it is time to merge spatial data set **state** with a regular data set **us_state_income**.
 - We used `merge` from `sf` package in previous examples. 
-- The function `geo_join(spatial_data, data_frame, by_sp, by_df)` from `tigris` package also allows
-us to do this.
+- The function `geo_join(spatial_data, data_frame, by_sp, by_df)` from `tigris` package also allows us to do this.
+
 
 ```{r}
 income_data <- state %>% 
                  geo_join(us_state_income, by_sp = "GEOID", by_df = "GEOID")
                    #by_sp: The column name you'll use for the merge from your spatial data frame.
                    #by_df: The column name you'll use for the merge from your regular data frame.	
-
+                   # since both columns share the same name, by = "GEOID" can also be used.
 
 View(income_data)
 ```
@@ -167,10 +167,9 @@ library(leaflet)
 - Once installed, you can use this package at the `R console`,
 within `R Markdown` documents, and within `Shiny applications`.
 
-
 #### Basic Usage
 
-- You create a **Leaflet map** with these basic steps:
+- You can create a **Leaflet map** with these basic steps:
   - Create a map widget by calling `leaflet()` function with an **sf** object.
   - Add layers to the map by using layer functions:
     - `addPolygons()`: Add polygons to the map.
@@ -213,7 +212,7 @@ income_data_WGS84 %>%
 
 #colorFactor() in HW2!!!.
 
-pal_col <- colorNumeric(palette="Purples", domain = income_data_WGS84$estimate) 
+pal_col <- colorNumeric(palette = "Purples", domain = income_data_WGS84$estimate) 
 
 #domain = income_data_WGS84$estimate: to be consistent over multiple calls. otherwise
 #it may give different hex colors from "Purples" pallette.
@@ -241,8 +240,8 @@ map2 <- income_data_WGS84 %>%
                        fillColor = ~pal_col(estimate)) %>% 
             #a point on the on the south west and a point on the north east.
             #with two points, it draws a surrounding rectangular.
-          fitBounds(lng1=-124.848974, lat1=24.396308, 
-                    lng2=-66.885444,  lat2=49.384358) %>% #fit the map into a box
+          fitBounds(lng1 = -124.848974, lat1 = 24.396308,  #fit the map into a box  #south west point
+                    lng2 = -66.885444,  lat2 = 49.384358) %>% #north east point
 #https://www.quora.com/What-is-the-longitude-and-latitude-of-a-bounding-box-around-the-continental-United-States
           addTiles()  #add base map where default is OSM.
 map2
@@ -256,8 +255,8 @@ map3 <- income_data_WGS84 %>%
            addPolygons(stroke = FALSE, 
                        fillColor = ~pal_col(estimate),
                        fillOpacity = 0.8)  %>% 
-            fitBounds(lng1=-124.848974, lat1=24.396308, 
-                      lng2=-66.885444,  lat2=49.384358) %>% 
+            fitBounds(lng1 = -124.848974, lat1 = 24.396308, 
+                      lng2 = -66.885444,  lat2 = 49.384358) %>% 
              addTiles() 
           
        
@@ -271,15 +270,16 @@ map3
 map4 <- income_data_WGS84 %>% 
           leaflet() %>% 
           addTiles() %>% 
-           addPolygons(stroke = FALSE, 
+          addPolygons(stroke = FALSE, 
                        fillColor = ~pal_col(estimate),
                        fillOpacity = 0.8)  %>% 
-             fitBounds(lng1=-124.848974, lat1=24.396308, 
-                       lng2=-66.885444,  lat2=49.384358)  %>% 
-            addLegend("bottomright",  # location
-                       pal=pal_col,    # palette function
-                       values=~estimate,  # value to be passed to palette function
-                      title = 'Median Household Income') # legend title       
+           fitBounds(lng1 = -124.848974, lat1 = 24.396308, 
+                      lng2 = -66.885444,  lat2 = 49.384358)  %>% 
+            addLegend(position = "bottomright",  # location
+                       pal = pal_col,    # palette function
+                       values = ~ estimate,  # value to be passed to palette function
+                       title = 'Median Household Income') %>% # legend title  
+               addTiles() 
 map4
 ```
 
@@ -298,16 +298,17 @@ labels <-  sprintf("<strong>%s</strong><br/> Income: %s $", income_data_WGS84$NA
 map5 <- income_data_WGS84 %>% 
           leaflet() %>% 
           addTiles() %>% 
-           addPolygons(stroke = FALSE, 
+          addPolygons(stroke = FALSE, 
                        fillColor = ~pal_col(estimate),
                        fillOpacity = 0.8,
                        label = labels)  %>% 
-             fitBounds(lng1=-124.848974, lat1=24.396308, 
-                       lng2=-66.885444,  lat2=49.384358)  %>% 
-addLegend("bottomright",  # location
-            pal=pal_col,    # palette function
-            values=~estimate,  # value to be passed to palette function
-            title = 'Median Household Income') # legend title       
+          fitBounds(lng1 = -124.848974, lat1 = 24.396308, 
+                    lng2 = -66.885444,  lat2 = 49.384358)  %>% 
+           addLegend(position = "bottomright",  # location
+                     pal = pal_col,    # palette function
+                     values = ~estimate,  # value to be passed to palette function
+                     title = 'Median Household Income') %>%  # legend title 
+            addTiles() 
 map5
 
 ```
