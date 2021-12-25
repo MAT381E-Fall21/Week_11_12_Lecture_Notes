@@ -1,0 +1,324 @@
+---
+title: 'MAT381E-Week 12: Web Mapping Spatial Data'
+subtitle: Web Mapping with Leaflet
+---
+
+#### US Census Data 
+
+#### R package tidycensus
+
+```{r, out.width="%10"}
+knitr::include_graphics("logo/tidycensus.png")
+```
+
+- [`R  tidycensus`](https://walker-data.com/tidycensus/) package allows users to interface with the [US Census Bureau's](https://www.census.gov/en.html):
+  - Decennial Census and 
+  - Five-year American Community data 
+- return `tidyverse-ready` data frames.
+
+- Note that: ACS data differ from decennial Census data as they are based on an annual sample of approximately 3 million households, rather than a more complete enumeration of the US population.
+
+- Install the package with the following commands:
+
+```{r}
+#install.packages("tidycensus")
+```
+
+- To get started working with `tidycensus`, users should load the package along with the 
+`tidyverse` package, and set their **Census API key**. 
+- A key can be obtained from http://api.census.gov/data/key_signup.html.
+
+```{r, warning=F, message=F}
+library(tidyverse)
+library(tidycensus)
+#https://stackoverflow.com/questions/15248815/rgdal-package-installation
+#for macOs users
+#install.packages('rgdal', type = "source", configure.args=c('--with-proj-include=/usr/local/include','--with-proj-lib=/usr/local/lib'))
+#set your API key.
+census_api_key("9d72c8e5767036d483cb20293bd3960c005a2f53", overwrite=TRUE, install=TRUE)
+```
+
+- The basic usage of `tidycensus` is available at: https://walker-data.com/tidycensus/articles/basic-usage.html.
+
+- There are two major functions implemented in tidycensus:
+
+   - `get_decennial(geography, variables, year)` : grants access to the **2000 and 2010 decennial US Census APIs**, and 
+   - `get_acs(geography, variables, year)`: grants access to the **1-year and 5-year American Community Survey APIs**.
+  
+#### State-level map of U.S. median income data from the 2014-2018 5-year American Community Survey (ACS)
+
+- First, we will obtain the sate-level income data from the 2014-2018 5-year American Community Survey (ACS) 
+from the `tidycensus` package and make a **state-level** map of U.S. **median income data**. 
+ 
+- A small note: The American Community Survey (ACS) helps local officials, community leaders, and businesses 
+  understand the changes taking place in their communities. It is the premier source for detailed population 
+  and housing information about the nation.
+
+```{r}
+data <- get_acs(geography = "state") 
+View(data)
+```
+
+- Getting variables from the Census or ACS requires knowing the variable ID - and there are 
+thousands of these IDs across the different Census files. To rapidly search for variables, 
+use the `load_variables()` function. 
+
+```{r}
+#https://walker-data.com/tidycensus/articles/basic-usage.html
+v18 <- load_variables(dataset = "acs5", year = 2018)  #year:endyear of the ACS, dataset:acs1, acs5
+View(v18)
+#"B19013_001" = Median household income in the past
+```
+
+- Get the data now and drop if there is any NA.
+
+```{r, message=FALSE, warning=F}
+library(tidyr)
+us_state_income <- get_acs(geography = "state", 
+                           variables = c(median_income = "B19013_001"), year = 2018) %>% #call the variable as median_income
+                           drop_na()
+              
+View(us_state_income)
+#https://www2.census.gov/geo/pdfs/reference/geodiagram.pdf
+```
+
+- The function returns a tibble with columns by default: 
+  - `GEOID`: which is an identifier for the geographical unit associated with the row, 
+  - `NAME`: which is a descriptive name of the geographical unit; variable, 
+  - `variable`: which is the Census variable represented in the row, and 
+  - `ESTIMATE`: which is the value of the variable for that unit.
+  
+- Note that: ACS data do not represent precise counts of population subgroups, but are rather designed to give a general sense of how socioeconomic indicators vary across the country.
+
+#### Retrieving Shape files
+
+#### R package tigris
+
+```{r, out.width="%50"}
+knitr::include_graphics("logo/tigris.png")
+```
+
+- The core TIGER/Line Files and Shapefiles, which contain geographic entity codes (GEOIDs) 
+that can be linked to the Census Bureau’s demographic data is available at https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html.
+
+- [`R tigris`](https://github.com/walkerke/tigris) package allows users to directly download 
+and use TIGER/Line and shapefiles (https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html) 
+from the US Census Bureau.
+
+- Install and load the package with the following commands:
+
+```{r}
+#install.packages("tigris")
+library(tigris)
+options(tigris_use_cache = TRUE)
+```
+
+- The `states` function allows us to download the shape files.
+
+```{r}
+#If cb is set to TRUE, download a generalized (1:500k) states file. Defaults to FALSE (the most detailed TIGER/Line file)
+state <- states(cb = TRUE, resolution = "20m") 
+View(state)
+```
+
+```{r}
+class(state)
+```
+
+- Now it is time to merge spatial data set **state** with a regular data set **us_state_income**.
+- We used `merge` from `sf` package in previous examples. 
+- The function `geo_join(spatial_data, data_frame, by_sp, by_df)` from `tigris` package also allows
+us to do this.
+
+```{r}
+income_data <- state %>% 
+                 geo_join(us_state_income, by_sp = "GEOID", by_df = "GEOID")
+                   #by_sp: The column name you'll use for the merge from your spatial data frame.
+                   #by_df: The column name you'll use for the merge from your regular data frame.	
+
+
+View(income_data)
+```
+
+
+```{r}
+class(income_data)
+```
+
+
+#### Web Mapping
+
+- The [`R leaflet`](https://rstudio.github.io/leaflet/) package provides 
+bindings to the ‘Leaflet’ [JavaScript library](https://leafletjs.com/), 
+“the leading open-source JavaScript library for mobile-friendly interactive maps”. 
+- Visit the page at https://rstudio.github.io/leaflet/ for detailed features.
+
+- We have already seen a simple use of `leaflet` in the `tmap` examples.
+- The good and bad news is that the leaflet library gives us lots of options 
+to customize the web look and feel of the map.
+
+- First we install and load the leaflet library. 
+
+```{r}
+#install.packages("leaflet")
+library(leaflet)
+```
+
+- Once installed, you can use this package at the `R console`,
+within `R Markdown` documents, and within `Shiny applications`.
+
+
+#### Basic Usage
+
+- You create a **Leaflet map** with these basic steps:
+  - Create a map widget by calling `leaflet()` function with an **sf** object.
+  - Add layers to the map by using layer functions:
+    - `addPolygons()`: Add polygons to the map.
+    - `addTiles()`: Add a tile layer to the map.
+    - `addMarkers()`: Add markers to the map.
+    - `addPopups()`: Add popups to the map.
+    - `addCircles()`: Add circles to the map.
+  - Use the pipe operator %>% to chain the elements together when building up a map with leaflet.
+  - Print the map widget to display it.
+- More at: https://leafletjs.com/reference-1.7.1.html
+
+
+
+```{r}
+# leaflet does require us to explicitly reproject the sf object.
+# Otherwise throws an error.
+library(sf)
+st_crs(income_data)  #EPSG:4269 
+```
+
+- Transform crs to 4326.
+
+```{r}
+income_data_WGS84 <- st_transform(income_data, crs = 4326)
+```
+
+
+```{r}
+income_data_WGS84 %>% 
+          leaflet() %>%  
+           addPolygons(color="black") #color="black", weight=1, fillColor="white"
+```
+
+
+```{r}
+## Set value for the minZoom and maxZoom settings.
+#leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
+
+#colorNumeric: Conveniently maps data values (numeric or factor/character) to colors according to a given palette, which can be provided in a variety of formats.
+
+#colorFactor() in HW2!!!.
+
+pal_col <- colorNumeric(palette="Purples", domain = income_data_WGS84$estimate) 
+
+#domain = income_data_WGS84$estimate: to be consistent over multiple calls. otherwise
+#it may give different hex colors from "Purples" pallette.
+    
+map1 <- income_data_WGS84 %>% 
+          leaflet() %>%  
+           addPolygons(stroke = FALSE, #remove polygon borders
+                       fillColor = ~pal_col(estimate)) # set fill color with function from above and estimate value
+                       
+
+map1
+```
+
+
+```{r}
+class(map1)
+```
+
+- Add a basemap and fit the map into a box within predefined coordinates.
+
+```{r}
+map2 <- income_data_WGS84 %>% 
+          leaflet() %>% 
+          addPolygons(stroke = FALSE, 
+                       fillColor = ~pal_col(estimate)) %>% 
+            #a point on the on the south west and a point on the north east.
+            #with two points, it draws a surrounding rectangular.
+          fitBounds(lng1=-124.848974, lat1=24.396308, 
+                    lng2=-66.885444,  lat2=49.384358) %>% #fit the map into a box
+#https://www.quora.com/What-is-the-longitude-and-latitude-of-a-bounding-box-around-the-continental-United-States
+          addTiles()  #add base map where default is OSM.
+map2
+```
+
+- Increase the opacity of colors.
+
+```{r}
+map3 <- income_data_WGS84 %>% 
+          leaflet() %>% 
+           addPolygons(stroke = FALSE, 
+                       fillColor = ~pal_col(estimate),
+                       fillOpacity = 0.8)  %>% 
+            fitBounds(lng1=-124.848974, lat1=24.396308, 
+                      lng2=-66.885444,  lat2=49.384358) %>% 
+             addTiles() 
+          
+       
+map3
+```
+
+
+- Add legend.
+
+```{r}
+map4 <- income_data_WGS84 %>% 
+          leaflet() %>% 
+          addTiles() %>% 
+           addPolygons(stroke = FALSE, 
+                       fillColor = ~pal_col(estimate),
+                       fillOpacity = 0.8)  %>% 
+             fitBounds(lng1=-124.848974, lat1=24.396308, 
+                       lng2=-66.885444,  lat2=49.384358)  %>% 
+            addLegend("bottomright",  # location
+                       pal=pal_col,    # palette function
+                       values=~estimate,  # value to be passed to palette function
+                      title = 'Median Household Income') # legend title       
+map4
+```
+
+
+- Finally, add `labels` with label argument in `addPolygons()` layer.
+    - `labels`: a character vector of the **HTML content** for the labels.
+
+```{r}
+#A wrapper for the C function sprintf, that returns a character vector containing a formatted #combination of text and variable values.
+
+labels <-  sprintf("<strong>%s</strong><br/> Income: %s $", income_data_WGS84$NAME.x, income_data_WGS84$estimate) %>%
+            lapply(htmltools::HTML)  #converts it into a HTML content
+ 
+#Answer: https://stackoverflow.com/questions/11623224/what-does-s-mean-in-php-html-or-xml
+
+map5 <- income_data_WGS84 %>% 
+          leaflet() %>% 
+          addTiles() %>% 
+           addPolygons(stroke = FALSE, 
+                       fillColor = ~pal_col(estimate),
+                       fillOpacity = 0.8,
+                       label = labels)  %>% 
+             fitBounds(lng1=-124.848974, lat1=24.396308, 
+                       lng2=-66.885444,  lat2=49.384358)  %>% 
+addLegend("bottomright",  # location
+            pal=pal_col,    # palette function
+            values=~estimate,  # value to be passed to palette function
+            title = 'Median Household Income') # legend title       
+map5
+
+```
+
+
+#### Attributions
+ - https://cengel.github.io/R-spatial/mapping.html#plotting-simple-features-sf-with-plot
+ - https://asmae-toumi.netlify.app/posts/2020-08-10-how-to-make-web-ready-us-county-level-maps/
+ - An example from Wall Street Journal: https://www.wsj.com/articles/americans-up-and-moved-during-the-pandemic-heres-where-they-went-11620734566?st=p2rphhkqd593xgy&reflink=desktopwebshare_twitter&mod=e2twg
+ - An example on [Global Lightning Density Map](https://interactive-lightning-map.vaisala.com/).
+ - An example on [Mapped - a world at war](https://www.thenewhumanitarian.org/maps-and-graphics/2017/04/04/updated-mapped-world-war).
+ 
+ https://twitter.com/fatmaaladag/status/1471150569716916238
+ 
