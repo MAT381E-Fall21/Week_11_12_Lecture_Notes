@@ -3,6 +3,6 @@
 There are three `.Rmd/html` files to follow:  
 
  - `intro_spatial_data.Rmd/intro_spatial_data.html`,
- - `spatial_data_visualization.Rmd/spatial_data_visualization.html` (next week), and
- - `web_mapping_with_leaflet.Rmd/web_mapping_with_leaflet.html` (next week).
+ - `spatial_data_visualization.Rmd/spatial_data_visualization.html`, and
+ - `web_mapping_with_leaflet.Rmd/web_mapping_with_leaflet.html`.
  
