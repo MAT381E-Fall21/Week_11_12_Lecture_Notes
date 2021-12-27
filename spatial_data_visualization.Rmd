@@ -89,7 +89,7 @@ and **its neighborhoods**, respectively.
 then converts them into `sf` objects depending on the `geo_format` input argument within
 `get_census()` function.
 
-- Note that more info availabe at: https://www.r-bloggers.com/2020/03/working-with-statistics-canada-data-in-r-part-5-retrieving-census-data/.
+- Note that more info available at: https://www.r-bloggers.com/2020/03/working-with-statistics-canada-data-in-r-part-5-retrieving-census-data/.
 
 ```{r}
 library(cancensus)
@@ -98,7 +98,8 @@ library(sf)
 toronto11_sf <- get_census(dataset='CA11', 
                            regions=list(CMA="35535"),
                            level='CSD', quiet = TRUE, 
-                           geo_format = 'sf', labels = 'short')
+                           geo_format = 'sf', 
+                           labels = 'short')
 View(toronto11_sf)
 ```
 
@@ -383,51 +384,51 @@ creating shaded areas and border outlines.
   
 - Of course, these default values and other aesthetics can be overridden.
 
-- The most commonly used aesthetics for `fill` layer include: 
+- The most commonly used aesthetics for `tm_fill` layer include: 
  
   - `col`  : color and
   - `alpha`: transparency. 
 
-- The most commonly used aesthetics for `border` layers include:   
+- The most commonly used aesthetics for `tm_borders` layers include:   
   
   - `col`  : color,
   - `alpha`: transparency, 
-  - `lwd` : line width, and 
-  - `lty` : line type.
+  - `lwd`  : line width, and 
+  - `lty`  : line type.
 
 - The impact of these settings with **fixed values** is illustrated as follows:
 
 ```{r}
 library(tmap)
-ma1 <- tm_shape(toronto) + 
+map1 <- tm_shape(toronto) + 
          tm_fill(col = "red")  #no variable
-ma1
+map1
 ```
 
 
 ```{r}
-ma2 <- tm_shape(toronto) + 
+map2 <- tm_shape(toronto) + 
            tm_fill(col = "red", alpha = 0.1) #no variable
 
-ma2
+map2
 ```
 
 
 ```{r}
-ma3 <- tm_shape(toronto) + 
+map3 <- tm_shape(toronto) + 
           tm_borders(col = "blue", lwd = 3 , lty ="dashed")
-ma3
+map3
 ``` 
 
 ```{r}
-ma4 <- tm_shape(toronto) + 
+map4 <- tm_shape(toronto) + 
           tm_fill(col = "lang_TR_16", alpha = 0.5) + #mapping with a variable brings a legend
            tm_borders(col = "black", lwd = 3, lty = "dashed")
-ma4
+map4
 ```
 
 ```{r}
-tmap_arrange(ma1, ma2, ma3, ma4)
+tmap_arrange(map1, map2, map3, map4)
 ```
 
 
@@ -436,10 +437,10 @@ which sets the **title of the associated legend**.
 
 
 ```{r}
-ma5 <-tm_shape(toronto) + 
+map5 <-tm_shape(toronto) + 
       tm_fill(col = "lang_TR_16", title = "Household range") + 
       tm_borders(col = "black", lwd = 3, lty = "dashed")
-ma5
+map5
 ```
 
 
@@ -449,7 +450,7 @@ ma5
 - They can have a major impact on how spatial variability is portrayed. 
 - This following shows four input arguments of coloring regions in Toronto depending on number of households speaking Turkish in 2016 within `tm_fill()` layer:
    -  `style`: refers to the classification method that should be used to “bin” the data.
-      Options: quantile, jenks, pretty, equal, sd.
+      Options: kmeans, quantile, jenks, pretty, equal, sd.
    -  `breaks`: allows you to manually set the breaks, and
    -  `n`: sets the number of bins into which numeric variables are categorized
    
@@ -468,7 +469,7 @@ ma6
   
    
    -  `palette`: defines the color scheme associated with the bins and determined by the breaks and n.
-      It expects a vector of colors or a new color palette name, which can be selected interactively with `tmaptools::palette_explorer()`. You can add a - as prefix to reverse the palette order.
+It expects a vector of colors or a new color palette name, which can be selected interactively with `tmaptools::palette_explorer()`. You can add a - as prefix to reverse the palette order.
 - To run this you’ll need to make sure you have the `shiny` and `shinyjs` packages installed. 
 - You can also run `display.brewer.all()` in your console to view the Color Brewer palettes.
 
@@ -480,46 +481,46 @@ tmaptools::palette_explorer()
 
 ```{r}
 library(tmap)
-ma7 <- tm_shape(toronto) + 
+map7 <- tm_shape(toronto) + 
              tm_fill(col = "lang_TR_16", 
-                     style = "pretty",  
-                     palette = "BuPu", #try: kmeans, quantile, jenks, pretty etc
+                     style = "pretty",  #try: kmeans, quantile, jenks, pretty etc
+                     palette = "BuPu", 
                      title = "Household range")
-ma7 
+map7 
 ```
 
 
 ```{r}
 library(tmap)
-ma8 <- tm_shape(toronto) + 
+map8 <- tm_shape(toronto) + 
        tm_fill(col = "lang_TR_16", 
                breaks = c(0, 1, 2, 3, 4, 5, 6) * 1000,
                palette = "BuPu",
                title = "Household range") 
-ma8
+map8
 ```
 
 
 ```{r}
 library(tmap)
-ma9 <- tm_shape(toronto) + 
+map9 <- tm_shape(toronto) + 
        tm_fill(col = "lang_TR_16", 
                n = 3,
                palette = "BuPu",
                title = "Household range")
-ma9
+map9
 ```
 
 
 ```{r}
 library(tmap)
-ma10 <- tm_shape(toronto) + 
+map10 <- tm_shape(toronto) + 
        tm_fill(col = "lang_TR_16", 
                n = 3,
                palette = "-BuPu", #reverse the color order
                title = "Household range")
 
-ma10
+map10
 ```
 
 
@@ -655,8 +656,8 @@ onto our map.
 ```{r}
 # Create a simple geographic object with one point
 point <- data.frame("loc_name" = c("Turkish Consulate General in Toronto"), 
-                  lat = c(43.63845746746079), 
-                  long = c(-79.3923696116396))
+                     lat = c(43.63845746746079), 
+                     long = c(-79.3923696116396))
 point
 ```
 
@@ -702,7 +703,7 @@ facet_map +
   tm_shape(sites) +  #get the point sf object
    tm_bubbles(size = 0.5, col = "red") +
     tm_text("loc_name", size = 0.5) +
-  tm_basemap(server = "OpenStreetMap") #OpenStreetMap.HOT
+   tm_basemap(server = "OpenStreetMap") #OpenStreetMap.HOT
 ```
 
 # tmap_save() saves interactive plots (currently does not support facets)
